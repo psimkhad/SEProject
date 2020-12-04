@@ -4,14 +4,13 @@ from django.http import JsonResponse
 from django.shortcuts import render
 from django.contrib import messages
 from .models import *
-from .forms import LoginForm
+from .forms import LoginForm, RegisterForm
 
 
 def login(request):
 
     if request.method == 'POST':
         form = LoginForm(request.POST)
-        print(form.is_valid())
         if form.is_valid():
             uname = form.cleaned_data['username']
             pword = form.cleaned_data['password']
@@ -31,6 +30,41 @@ def login(request):
         form = LoginForm()
 
     return render(request, 'login.html', {'form': form.as_p})
+
+
+def register(request):
+    if (request.session.has_key('id')):
+        uid = int(request.session['id'])
+        user = User.objects.get(
+            userid=uid)
+        if user.userrole == 'SUPERUSER':
+            if request.method == 'POST':
+                form = RegisterForm(request.POST)
+                if form.is_valid():
+                    uname = form.cleaned_data['username']
+                    pword = form.cleaned_data['password']
+                    cword = form.cleaned_data['confirm_password']
+                    urole = form.cleaned_data['userrole']
+                    if pword == cword:
+                        userexist = User.objects.filter(
+                            username=uname).exists()
+                        if userexist:
+                            messages.error(request, "Username already exists!")
+                        else:
+                            User(username=uname, password=pword,
+                                 userrole=urole).save()
+                            return HttpResponseRedirect('/register')
+                    else:
+                        messages.error(request, "Password did not match!")
+                else:
+                    messages.error(request, "Invalid Input data!")
+            else:
+                form = RegisterForm()
+
+        return render(request, 'register.html', {'form': form.as_p, 'loginuser': user.username, 'userrole': user.userrole})
+
+    else:
+        return HttpResponseRedirect('/login')
 
 
 def logout(request):
@@ -59,7 +93,7 @@ def link(request):
             data.append(link)
 
         if request.method == 'GET':
-            return render(request, 'link.html', {'data': data, 'loginuser': user.username})
+            return render(request, 'link.html', {'data': data, 'loginuser': user.username, 'userrole': user.userrole})
     else:
         return HttpResponseRedirect('/login')
 
@@ -70,6 +104,6 @@ def help(request):
         user = User.objects.get(
             userid=uid)
         if user and request.method == 'GET':
-            return render(request, 'help.html', {'loginuser': user.username})
+            return render(request, 'help.html', {'loginuser': user.username, 'userrole': user.userrole})
     else:
         return HttpResponseRedirect('/login')
