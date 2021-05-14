@@ -1,5 +1,5 @@
 /*
-Description: 
+Description of the Project: 
 We have been asked to build an admin portal that will allow a company internal employees to access the portal and perform admin functions on behalf of company clients.
 
 Here are additional details:
