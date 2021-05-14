@@ -9,7 +9,7 @@ Here are additional details:
 •	There are five categories of applications and five admin roles for each category. 
 
 
-Assumptions:
+Assumptions that we used:
 Security is already in place as this is an internal application. Company uses single-sign-on (SSO). You do not need to worry about login.
 */
 
